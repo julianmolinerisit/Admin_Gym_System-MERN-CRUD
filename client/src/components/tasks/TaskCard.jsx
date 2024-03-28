@@ -29,7 +29,8 @@ const calcularProximoPago = (fechaInicioMembresia) => {
         </div>
         <div className="flex gap-x-2 items-center">
           <Button onClick={() => deleteTask(task._id)}>Delete</Button>
-          <ButtonLink to={`/tasks/${task._id}`}>Edit</ButtonLink>
+          <ButtonLink to={`/tasks/${task._id}`}>Edit</ButtonLink>  
+        {/* El edit no funciona. */}
 
         </div>
       </header>
