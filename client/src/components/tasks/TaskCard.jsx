@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useTasks } from "../../context/tasksContext";
 import { Button, ButtonLink, Card } from "../ui";
 
 export function TaskCard({ task }) {
   const { deleteTask, updateTask } = useTasks();
   const [pagado, setPagado] = useState(task.pagado);
+  const [fechasAdeudadas, setFechasAdeudadas] = useState([]);
+  const [alerta, setAlerta] = useState("");
 
   const handleAbonoClick = async () => {
     try {
@@ -15,20 +17,52 @@ export function TaskCard({ task }) {
     }
   };
 
-  // Función para calcular la fecha del próximo pago y la alerta
-  const calcularProximoPago = (fechaInicioMembresia) => {
-    const fechaInicio = new Date(fechaInicioMembresia);
-    const fechaActual = new Date();
-    const unaSemana = 7 * 24 * 60 * 60 * 1000; // Milisegundos en una semana
+  useEffect(() => {
+    const calcularFechasAdeudadas = (fechaInicioMembresia) => {
+      const fechaInicio = new Date(fechaInicioMembresia);
+      const fechaActual = new Date();
 
-    // Se calcula la fecha del próximo pago sumando un mes a la fecha de inicio de membresía
-    const fechaProximoPago = new Date(fechaInicio.getFullYear(), fechaInicio.getMonth() + 1, fechaInicio.getDate());
-    const fechaAlerta = new Date(fechaProximoPago.getTime() - unaSemana);
+      // Calcular fechas adeudadas desde el mes siguiente al inicio de membresía hasta el mes actual
+      let fechaProximoPago = new Date(fechaInicio);
+      const fechasAdeudadas = [];
 
-    return { fechaProximoPago, fechaAlerta };
-  };
+      while (fechaProximoPago < fechaActual) {
+        fechaProximoPago.setMonth(fechaProximoPago.getMonth() + 1);
+        fechasAdeudadas.push(new Date(fechaProximoPago));
+      }
 
-  const { fechaProximoPago, fechaAlerta } = calcularProximoPago(task.fechaInicioMembresia);
+      setFechasAdeudadas(fechasAdeudadas);
+    };
+
+    calcularFechasAdeudadas(task.fechaInicioMembresia);
+  }, [task.fechaInicioMembresia]);
+
+  useEffect(() => {
+    const calcularProximoPago = (fechaInicioMembresia) => {
+      const fechaInicio = new Date(fechaInicioMembresia);
+      const fechaActual = new Date();
+
+      // Calcular el próximo pago
+      let fechaProximoPago = new Date(fechaInicio);
+      while (fechaProximoPago <= fechaActual) {
+        fechaProximoPago.setMonth(fechaProximoPago.getMonth() + 1);
+      }
+
+      setAlerta(""); // Restablecer la alerta
+
+      if (fechaProximoPago.getDate() === fechaInicio.getDate()) {
+        // Si el próximo pago coincide con el día de inicio de membresía, mostrar mensaje de alerta
+        setAlerta("¡Alerta! El pago está vencido");
+      } else if (fechaProximoPago.getTime() - fechaActual.getTime() <= 7 * 24 * 60 * 60 * 1000) {
+        // Si faltan menos de 7 días para el próximo pago, mostrar mensaje de alerta
+        setAlerta("En una semana debe abonar");
+      }
+
+      return fechaProximoPago;
+    };
+
+    calcularProximoPago(task.fechaInicioMembresia);
+  }, [task.fechaInicioMembresia]);
 
   return (
     <Card>
@@ -44,23 +78,29 @@ export function TaskCard({ task }) {
         </div>
       </header>
       <p>
-        Fecha de Nacimiento: {task.fechaNacimiento && new Date(task.fechaNacimiento).toLocaleDateString()}
+        Fecha de Nacimiento: {task.fechaNacimiento && new Date(task.fechaNacimiento).toLocaleDateString("es-ES")}
       </p>
       <p>
-        Fecha de alta de cuenta: {task.fechaInicioMembresia && new Date(task.fechaInicioMembresia).toLocaleDateString()}
+        Fecha de alta de cuenta: {task.fechaInicioMembresia && new Date(task.fechaInicioMembresia).toLocaleDateString("es-ES")}
       </p>
       <p>
         Próximo pago:{" "}
-        {fechaProximoPago &&
-          fechaProximoPago.toLocaleDateString("es-ES", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
+        {fechasAdeudadas.map((fecha, index) => (
+          <span key={index}>
+            {fecha.toLocaleDateString("es-ES", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+            {index !== fechasAdeudadas.length - 1 && ", "}
+          </span>
+        ))}
       </p>
-      {fechaAlerta && fechaAlerta.getTime() <= new Date().getTime() && !pagado && (
-        <p className="text-red-500">¡Alerta! El pago está vencido.</p>
+      {alerta && (
+        <p className={alerta.includes("¡Alerta!") ? "text-red-500" : "text-blue-500"}>
+          {alerta}
+        </p>
       )}
       <p>{task.comentarios}</p>
     </Card>
