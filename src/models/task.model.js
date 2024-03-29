@@ -25,6 +25,10 @@ const taskSchema = new mongoose.Schema(
     comentarios: {
       type: String,
     },
+    pagado: {
+      type: Boolean,
+      default: false, // El pago se establece como no pagado por defecto
+    },
     user: {
       type: mongoose.Types.ObjectId,
       ref: "User",

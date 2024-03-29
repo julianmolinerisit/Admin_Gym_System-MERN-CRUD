@@ -50,16 +50,16 @@ export function TaskProvider({ children }) {
     }
   };
 
-  // Función para actualizar una tarea existente
-  const updateTask = async (id, task) => {
-    try {
-      const res = await updateTaskRequest(task); // Se pasa solo el objeto de la tarea
-      // Resto del código
-    } catch (error) {
-      console.error(error);
-    }
-  };
-  
+// Función para actualizar una tarea existente
+const updateTask = async (id, task) => {
+  try {
+    const res = await updateTaskRequest(id, task); // Pasa tanto el ID como el objeto de la tarea
+    // Resto del código
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 
   return (
     <TaskContext.Provider

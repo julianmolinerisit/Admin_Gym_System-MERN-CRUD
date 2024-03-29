@@ -42,18 +42,22 @@ export const deleteTask = async (req, res) => {
 
 export const updateTask = async (req, res) => {
   try {
-    const { nombre, apellido, dni, fechaNacimiento, fechaInicioMembresia, comentarios } = req.body;
+    console.log("Data received from frontend:", req.body); // Agregar este console.log para verificar los datos recibidos desde el frontend
+    const { nombre, apellido, dni, fechaNacimiento, fechaInicioMembresia, comentarios, pagado } = req.body;
     const taskUpdated = await Task.findOneAndUpdate(
-      { _id: req.params.id, user: req.user.id }, // Agrega la condición del usuario para actualizar solo sus propias tareas
-      { nombre, apellido, dni, fechaNacimiento, fechaInicioMembresia, comentarios },
+      { _id: req.params.id, user: req.user.id },
+      { nombre, apellido, dni, fechaNacimiento, fechaInicioMembresia, comentarios, pagado },
       { new: true }
     );
-    if (!taskUpdated) return res.status(404).json({ message: "Task not found or unauthorized" }); // Agrega manejo para tarea no encontrada o no autorizada
+    if (!taskUpdated) return res.status(404).json({ message: "Task not found or unauthorized" });
+    console.log("Updated task:", taskUpdated); // Agregar este console.log para verificar la tarea actualizada
     return res.json(taskUpdated);
   } catch (error) {
+    console.error("Error updating task:", error);
     return res.status(500).json({ message: error.message });
   }
 };
+
 
 export const getTask = async (req, res) => {
   try {
