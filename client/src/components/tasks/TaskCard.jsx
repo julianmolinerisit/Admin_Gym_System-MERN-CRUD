@@ -6,63 +6,52 @@ export function TaskCard({ task }) {
   const { deleteTask, updateTask } = useTasks();
   const [pagado, setPagado] = useState(task.pagado);
   const [fechasAdeudadas, setFechasAdeudadas] = useState([]);
-  const [alerta, setAlerta] = useState("");
+  const [proximoPago, setProximoPago] = useState(null);
+
+  useEffect(() => {
+    calcularFechasAdeudadas(task.fechaInicioMembresia);
+  }, [task.fechaInicioMembresia]);
 
   const handleAbonoClick = async () => {
     try {
-      await updateTask(task._id, { ...task, pagado: true });
-      setPagado(true); // Actualiza el estado de pagado
+      if (fechasAdeudadas.length > 0) {
+        fechasAdeudadas.shift(); // Eliminar la fecha más antigua de la lista
+        setFechasAdeudadas([...fechasAdeudadas]); // Actualizar las fechas adeudadas
+        setPagado(fechasAdeudadas.length === 0); // Actualizar estado de pagado si no hay más fechas adeudadas
+        calcularProximoPago(task.fechaInicioMembresia); // Calcular el próximo pago actualizado
+        // Aquí deberías guardar la tarea actualizada en la base de datos
+        await updateTask(task._id, { ...task, pagado: true });
+      }
     } catch (error) {
       console.error("Error al registrar el pago:", error);
     }
   };
 
-  useEffect(() => {
-    const calcularFechasAdeudadas = (fechaInicioMembresia) => {
-      const fechaInicio = new Date(fechaInicioMembresia);
-      const fechaActual = new Date();
+  const calcularFechasAdeudadas = (fechaInicioMembresia) => {
+    const fechaInicio = new Date(fechaInicioMembresia);
+    const fechaActual = new Date();
 
-      // Calcular fechas adeudadas desde el mes siguiente al inicio de membresía hasta el mes actual
-      let fechaProximoPago = new Date(fechaInicio);
-      const fechasAdeudadas = [];
+    // Calcular la primera fecha de pago un mes después de la fecha de alta
+    fechaInicio.setMonth(fechaInicio.getMonth() + 1);
 
-      while (fechaProximoPago < fechaActual) {
-        fechaProximoPago.setMonth(fechaProximoPago.getMonth() + 1);
-        fechasAdeudadas.push(new Date(fechaProximoPago));
-      }
+    const fechas = [];
+    while (fechaInicio <= fechaActual) {
+      fechas.push(new Date(fechaInicio));
+      fechaInicio.setMonth(fechaInicio.getMonth() + 1);
+    }
+    setFechasAdeudadas(fechas); // Actualizar las fechas adeudadas
+    calcularProximoPago(fechas); // Calcular el próximo pago
+  };
 
-      setFechasAdeudadas(fechasAdeudadas);
-    };
-
-    calcularFechasAdeudadas(task.fechaInicioMembresia);
-  }, [task.fechaInicioMembresia]);
-
-  useEffect(() => {
-    const calcularProximoPago = (fechaInicioMembresia) => {
-      const fechaInicio = new Date(fechaInicioMembresia);
-      const fechaActual = new Date();
-
-      // Calcular el próximo pago
-      let fechaProximoPago = new Date(fechaInicio);
-      while (fechaProximoPago <= fechaActual) {
-        fechaProximoPago.setMonth(fechaProximoPago.getMonth() + 1);
-      }
-
-      setAlerta(""); // Restablecer la alerta
-
-      if (fechaProximoPago.getDate() === fechaInicio.getDate()) {
-        // Si el próximo pago coincide con el día de inicio de membresía, mostrar mensaje de alerta
-        setAlerta("¡Alerta! El pago está vencido");
-      } else if (fechaProximoPago.getTime() - fechaActual.getTime() <= 7 * 24 * 60 * 60 * 1000) {
-        // Si faltan menos de 7 días para el próximo pago, mostrar mensaje de alerta
-        setAlerta("En una semana debe abonar");
-      }
-
-      return fechaProximoPago;
-    };
-
-    calcularProximoPago(task.fechaInicioMembresia);
-  }, [task.fechaInicioMembresia]);
+  const calcularProximoPago = (fechas) => {
+    if (fechas.length > 0) {
+      const proximoPago = new Date(fechas[0]);
+      proximoPago.setMonth(proximoPago.getMonth() + 2); // Solo un mes después, ya que se ha pagado solo un mes
+      setProximoPago(proximoPago); // Actualizar el próximo pago
+    } else {
+      setProximoPago(null);
+    }
+  };
 
   return (
     <Card>
@@ -74,7 +63,9 @@ export function TaskCard({ task }) {
         <div className="flex gap-x-2 items-center">
           <Button onClick={() => deleteTask(task._id)}>Delete</Button>
           <ButtonLink to={`/tasks/${task._id}`}>Edit</ButtonLink>
-          {!pagado && <Button onClick={handleAbonoClick}>Abono</Button>}
+          {(!pagado || fechasAdeudadas.length > 0) && (
+            <Button onClick={handleAbonoClick}>Abono</Button>
+          )}
         </div>
       </header>
       <p>
@@ -83,23 +74,19 @@ export function TaskCard({ task }) {
       <p>
         Fecha de alta de cuenta: {task.fechaInicioMembresia && new Date(task.fechaInicioMembresia).toLocaleDateString("es-ES")}
       </p>
-      <p>
-        Próximo pago:{" "}
-        {fechasAdeudadas.map((fecha, index) => (
-          <span key={index}>
-            {fecha.toLocaleDateString("es-ES", {
-              weekday: "long",
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-            {index !== fechasAdeudadas.length - 1 && ", "}
-          </span>
-        ))}
-      </p>
-      {alerta && (
-        <p className={alerta.includes("¡Alerta!") ? "text-red-500" : "text-blue-500"}>
-          {alerta}
+      {!pagado && proximoPago && (
+        <p>
+          Próximo pago: {proximoPago.toLocaleDateString("es-ES", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+          })}
+        </p>
+      )}
+      {!pagado && fechasAdeudadas.length > 0 && (
+        <p>
+          Fechas adeudadas: {fechasAdeudadas.map((fecha) => fecha.toLocaleDateString("es-ES")).join(", ")}
         </p>
       )}
       <p>{task.comentarios}</p>
