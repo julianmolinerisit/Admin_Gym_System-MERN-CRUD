@@ -46,7 +46,7 @@ export function TaskCard({ task }) {
   const calcularProximoPago = (fechas) => {
     if (fechas.length > 0) {
       const proximoPago = new Date(fechas[0]);
-      proximoPago.setMonth(proximoPago.getMonth() + 2); // Solo un mes después, ya que se ha pagado solo un mes
+      proximoPago.setMonth(proximoPago.getMonth() + 2);
       setProximoPago(proximoPago); // Actualizar el próximo pago
     } else {
       setProximoPago(null);
@@ -63,7 +63,7 @@ export function TaskCard({ task }) {
         <div className="flex gap-x-2 items-center">
           <Button onClick={() => deleteTask(task._id)}>Delete</Button>
           <ButtonLink to={`/tasks/${task._id}`}>Edit</ButtonLink>
-          {(!pagado || fechasAdeudadas.length > 0) && (
+          {!pagado && fechasAdeudadas.length > 0 && (
             <Button onClick={handleAbonoClick}>Abono</Button>
           )}
         </div>
