@@ -38,6 +38,13 @@ export function TaskFormPage() {
 
   const onSubmit = async (data) => {
     try {
+      console.log("Datos de tarea enviados al servidor:", data);
+
+      if (!params.id) {
+        // Nueva tarea, establecer la fecha de último ingreso como la fecha actual
+        data.ultimoIngreso = new Date();
+      }
+  
       if (params.id) {
         await updateTask(params.id, data); // Utiliza la función updateTask con el objeto de tarea directamente
       } else {
@@ -45,9 +52,10 @@ export function TaskFormPage() {
       }
       navigate("/tasks");
     } catch (error) {
-      console.error("Error al enviar la solicitud de actualización:", error);
+      console.error("Error al enviar la solicitud:", error);
     }
   };
+  
   
 
   return (

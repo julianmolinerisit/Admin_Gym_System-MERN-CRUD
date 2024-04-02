@@ -27,11 +27,14 @@ const taskSchema = new mongoose.Schema(
     },
     pagado: {
       type: Boolean,
-      default: false, // El pago se establece como no pagado por defecto
+      default: false,
     },
     user: {
       type: mongoose.Types.ObjectId,
       ref: "User",
+    },
+    ultimoIngreso: {
+      type: Date, // Agregar el campo para el último ingreso
     },
   },
   {

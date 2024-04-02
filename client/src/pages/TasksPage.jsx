@@ -13,13 +13,16 @@ export function TasksPage() {
   }, []);
 
   useEffect(() => {
-    if (searchDNI.trim() === "") {
-      setFilteredTasks(tasks);
-    } else {
-      const filtered = tasks.filter((task) =>
-        task.dni.toLowerCase().includes(searchDNI.toLowerCase().trim())
-      );
-      setFilteredTasks(filtered);
+    // Validar si tasks es un arreglo antes de aplicar filter
+    if (Array.isArray(tasks)) {
+      if (searchDNI.trim() === "") {
+        setFilteredTasks(tasks);
+      } else {
+        const filtered = tasks.filter((task) =>
+          task.dni.toLowerCase().includes(searchDNI.toLowerCase().trim())
+        );
+        setFilteredTasks(filtered);
+      }
     }
   }, [searchDNI, tasks]);
 

@@ -5,6 +5,8 @@ import { ProtectedRoute } from "./routes";
 
 import HomePage from "./pages/HomePage";
 import RegisterPage from "./pages/RegisterPage";
+import RegistroAccesoPage from "./pages/RegistroAccesoPage";
+
 import { TaskFormPage } from "./pages/TaskFormPage";
 import { LoginPage } from "./pages/LoginPage";
 import { TasksPage } from "./pages/TasksPage";
@@ -26,6 +28,8 @@ function App() {
                 <Route path="/add-task" element={<TaskFormPage />} />
                 <Route path="/tasks/:id" element={<TaskFormPage />} />
                 <Route path="/profile" element={<h1>Perfil</h1>} />
+                <Route path="/registro-acceso" element={<RegistroAccesoPage/>} /> {/* Nueva ruta */}
+                
               </Route>
             </Routes>
           </main>
