@@ -7,7 +7,8 @@ export const createTaskRequest = async (task) => axios.post("/tasks", task);
 export const updateTaskRequest = async (id, task) =>
   axios.put(`/tasks/${id}`, task); // Pasa tanto el ID como el objeto de la tarea
 
-
 export const deleteTaskRequest = async (id) => axios.delete(`/tasks/${id}`);
 
 export const getTaskRequest = async (id) => axios.get(`/tasks/${id}`);
+
+export const findTaskByDNIRequest = async (dni) => axios.get(`/tasks/dni/${dni}`);

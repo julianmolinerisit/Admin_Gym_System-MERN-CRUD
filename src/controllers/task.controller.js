@@ -88,29 +88,6 @@ export const updateTask = async (req, res) => {
   }
 };
 
-export const registrarAcceso = async (req, res) => {
-  try {
-    const { ultimoIngreso } = req.body;
-
-    const taskUpdated = await Task.findOneAndUpdate(
-      { _id: req.params.id, user: req.user.id },
-      { ultimoIngreso },
-      { new: true }
-    );
-
-    if (!taskUpdated) {
-      console.log("Tarea no encontrada o no autorizada para registrar acceso:", req.params.id);
-      return res.status(404).json({ message: "Task not found or unauthorized" });
-    }
-
-    console.log("Tarea actualizada con último ingreso:", taskUpdated);
-    return res.json(taskUpdated);
-  } catch (error) {
-    console.error("Error al registrar acceso:", error);
-    return res.status(500).json({ message: error.message });
-  }
-};
-
 export const getTask = async (req, res) => {
   try {
     const task = await Task.findById(req.params.id);
@@ -119,11 +96,23 @@ export const getTask = async (req, res) => {
       return res.status(404).json({ message: "Task not found" });
     }
     console.log("Tarea encontrada:", task);
-    return res.json(task);
+    return res.json(task); // Mantén la respuesta como está si task se encuentra
   } catch (error) {
     console.error("Error al obtener la tarea:", error);
     return res.status(500).json({ message: error.message });
   }
 };
+
+export const findTaskByDNI = async (dni) => {
+  try {
+    const task = await Task.findOne({ dni });
+    return task;
+  } catch (error) {
+    console.error('Error al buscar la tarea por DNI:', error);
+    throw new Error('Error al buscar la tarea por DNI');
+  }
+};
+
+
 
 

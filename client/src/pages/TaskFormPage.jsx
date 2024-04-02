@@ -6,7 +6,7 @@ import { Textarea } from "../components/ui/Textarea";
 import { useForm } from "react-hook-form";
 
 export function TaskFormPage() {
-  const { createTask, getTask, updateTask } = useTasks();
+  const { getTask, updateTask, createTask } = useTasks(); // Importa createTask desde useTasks
   const navigate = useNavigate();
   const params = useParams();
   const {
@@ -21,6 +21,7 @@ export function TaskFormPage() {
       try {
         if (params.id) {
           const task = await getTask(params.id);
+          console.log("Datos de tarea obtenidos:", task); // Agregar este console.log
           setValue("nombre", task.nombre);
           setValue("apellido", task.apellido);
           setValue("dni", task.dni);
@@ -40,21 +41,21 @@ export function TaskFormPage() {
       console.log("Datos de tarea enviados al servidor:", data);
 
       if (!params.id) {
-        // Nueva tarea, establecer la fecha de último ingreso como la fecha actual
-        data.ultimoIngreso = new Date().toISOString().split('T')[0];
-        data.pagado = false; // Agregar el campo pagado con su valor predeterminado
+        data.ultimoIngreso = new Date().toISOString().split("T")[0];
+        data.pagado = false;
       }
 
       if (params.id) {
-        await updateTask(params.id, data); // Utiliza la función updateTask con el objeto de tarea directamente
+        await updateTask(params.id, data);
       } else {
-        await createTask(data);
+        await createTask(data); // Utiliza la función createTask
       }
       navigate("/tasks");
     } catch (error) {
       console.error("Error al enviar la solicitud:", error);
     }
   };
+
 
   return (
     <Card>
