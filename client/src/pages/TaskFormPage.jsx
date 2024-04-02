@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import dayjs from "dayjs";
 import { Button, Card, Input, Label } from "../components/ui";
 import { useTasks } from "../context/tasksContext";
 import { Textarea } from "../components/ui/Textarea";
@@ -42,9 +41,10 @@ export function TaskFormPage() {
 
       if (!params.id) {
         // Nueva tarea, establecer la fecha de último ingreso como la fecha actual
-        data.ultimoIngreso = new Date();
+        data.ultimoIngreso = new Date().toISOString().split('T')[0];
+        data.pagado = false; // Agregar el campo pagado con su valor predeterminado
       }
-  
+
       if (params.id) {
         await updateTask(params.id, data); // Utiliza la función updateTask con el objeto de tarea directamente
       } else {
@@ -55,8 +55,6 @@ export function TaskFormPage() {
       console.error("Error al enviar la solicitud:", error);
     }
   };
-  
-  
 
   return (
     <Card>
@@ -67,7 +65,7 @@ export function TaskFormPage() {
           type="text"
           name="nombre"
           placeholder="Nombre"
-          {...register("nombre")}
+          {...register("nombre", { required: true })}
           autoFocus
         />
         {errors.nombre && (
@@ -95,7 +93,6 @@ export function TaskFormPage() {
 
         <Label htmlFor="fechaInicioMembresia">Fecha de Inicio de Membresía</Label>
         <Input type="date" name="fechaInicioMembresia" {...register("fechaInicioMembresia")} />
-
 
         <Label htmlFor="comentarios">Comentarios</Label>
         <Textarea

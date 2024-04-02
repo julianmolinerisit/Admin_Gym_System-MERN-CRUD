@@ -1,4 +1,6 @@
 import Task from "../models/task.model.js";
+import { createTaskSchema } from "../schemas/task.schema.js";
+
 
 export const getTasks = async (req, res) => {
   try {
@@ -18,6 +20,9 @@ export const createTask = async (req, res) => {
     // Agregar registro para mostrar los datos recibidos
     console.log("Datos recibidos para la creación de la tarea:", req.body);
 
+    // Verificar si el campo 'ultimoIngreso' está presente en la solicitud
+    const ultimoIngreso = req.body.ultimoIngreso ? req.body.ultimoIngreso : new Date().toISOString().split('T')[0];
+
     const newTask = new Task({
       nombre,
       apellido,
@@ -25,6 +30,7 @@ export const createTask = async (req, res) => {
       fechaNacimiento,
       fechaInicioMembresia,
       comentarios,
+      ultimoIngreso, // Incluir el campo 'ultimoIngreso' ya sea con el valor recibido o con la fecha actual
       user: req.user.id,
     });
 
@@ -41,6 +47,7 @@ export const createTask = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
 
 export const deleteTask = async (req, res) => {
   try {

@@ -1,10 +1,10 @@
 import { z } from "zod";
 
-export const taskSchema = z.object({
-  title: z.string({
-    required_error: "Title is required",
-  }),
-  description: z.string({
-    required_error: "Description is required",
-  }),
+export const createTaskSchema = z.object({
+  nombre: z.string().nonempty(),
+  apellido: z.string().nonempty(),
+  dni: z.string().nonempty(),
+  fechaNacimiento: z.date(), // No es necesario agregar refinamientos aquí
+  fechaInicioMembresia: z.date(), // No es necesario agregar refinamientos aquí
+  comentarios: z.string().optional(),
 });
