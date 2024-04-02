@@ -70,4 +70,3 @@ export const getTask = async (req, res) => {
 };
 
 
-sigo manejando el error...
