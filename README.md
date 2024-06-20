@@ -38,7 +38,7 @@
 ### Clonación del Repositorio
 
 ```bash
-git clone https://github.com/tuusuario/AdminGym.git
+git clone https://github.com/julianmolinerisit/AdminGym.git
 cd AdminGym
 ```
 Configuración del Backend
