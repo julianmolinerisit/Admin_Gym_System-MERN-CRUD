@@ -124,7 +124,6 @@ AdminGym/
 │   │   └── index.js
 │   └── package.json
 └── README.md
-
 ```
 
 # AdminGym
@@ -217,7 +216,7 @@ Uso
 3. Utiliza la sección de accesos para registrar entradas utilizando el DNI de los usuarios.
 
 Estructura del Proyecto
-
+```bash
 AdminGym/
 ├── backend/
 │   ├── controllers/
@@ -237,6 +236,7 @@ AdminGym/
 │   │   └── index.js
 │   └── package.json
 └── README.md
+```
 Scripts Disponibles
 Backend
 npm run dev: Inicia el servidor en modo desarrollo
