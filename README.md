@@ -127,11 +127,6 @@ AdminGym/
 
 ```
 
-
-Aquí tienes el archivo README completo con el formato solicitado:
-
-markdown
-Copiar código
 # AdminGym
 
 ## Descripción del Proyecto
@@ -174,49 +169,55 @@ Copiar código
 ```bash
 git clone https://github.com/tuusuario/AdminGym.git
 cd AdminGym
+```
+
 Configuración del Backend
+
 Navega al directorio del backend
-bash
-Copiar código
+```bash
 cd backend
+```
 Instala las dependencias
-bash
-Copiar código
+```bash
 npm install
+```
 Crea un archivo .env en el directorio backend con las siguientes variables:
 env
-Copiar código
+```bash
 PORT=4000
 MONGO_URI=tu_mongo_uri
 JWT_SECRET=tu_jwt_secret
+```
 Inicia el servidor
-bash
-Copiar código
+```bash
 npm run dev
+```
 Configuración del Frontend
+
 Navega al directorio del frontend
-bash
-Copiar código
+```bash
 cd frontend
+```
 Instala las dependencias
-bash
-Copiar código
+```bash
 npm install
+```
 Crea un archivo config.js en el directorio frontend/src con el siguiente contenido:
-javascript
-Copiar código
+```bash
 export const API_URL = "http://localhost:4000/api";
+```
 Inicia la aplicación
-bash
-Copiar código
+```bash
 npm start
+```
 Uso
-Registra un nuevo usuario y logueate en la aplicación.
-Accede a la sección de tareas para gestionar las tareas del gimnasio.
-Utiliza la sección de accesos para registrar entradas utilizando el DNI de los usuarios.
+
+1. Registra un nuevo usuario y logueate en la aplicación.
+2. Accede a la sección de tareas para gestionar las tareas del gimnasio.
+3. Utiliza la sección de accesos para registrar entradas utilizando el DNI de los usuarios.
+
 Estructura del Proyecto
-plaintext
-Copiar código
+
 AdminGym/
 ├── backend/
 │   ├── controllers/
