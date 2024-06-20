@@ -1,5 +1,6 @@
 import axios from "./axios";
 
+// Registers access by DNI
 export const registrarAccesoRequest = async (dni) => {
   try {
     const response = await axios.put(`/acceso/${dni}`);

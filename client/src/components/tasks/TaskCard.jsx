@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useTasks } from "../../context/tasksContext";
 import { Button, ButtonLink, Card } from "../ui";
 
+// Component to display task card
 export function TaskCard({ task }) {
   const { deleteTask, updateTask } = useTasks();
   const [pagado, setPagado] = useState(task.pagado);
@@ -31,9 +32,7 @@ export function TaskCard({ task }) {
   const calcularFechasAdeudadas = (fechaInicioMembresia) => {
     const fechaInicio = new Date(fechaInicioMembresia);
     const fechaActual = new Date();
-
     fechaInicio.setMonth(fechaInicio.getMonth() + 1);
-
     const fechas = [];
     while (fechaInicio <= fechaActual) {
       fechas.push(new Date(fechaInicio));
@@ -56,7 +55,9 @@ export function TaskCard({ task }) {
   return (
     <Card className="p-4">
       <div className="mb-4">
-        <h1 className="text-xl font-bold mb-2 text-white">{task.nombre} {task.apellido}</h1>
+        <h1 className="text-xl font-bold mb-2 text-white">
+          {task.nombre} {task.apellido}
+        </h1>
         <p className="text-gray-500">DNI: {task.dni}</p>
         <p className="text-gray-500">
           Fecha de Nacimiento: {task.fechaNacimiento && new Date(task.fechaNacimiento).toLocaleDateString("es-ES")}
