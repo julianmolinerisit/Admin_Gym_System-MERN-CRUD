@@ -1,32 +1,31 @@
 import React, { useState, useEffect } from "react";
 import { useTasks } from "../../context/tasksContext";
-import { Button, ButtonLink, Card } from "../ui";
+import { Button, ButtonLink } from "../ui";
 
-// Component to display task card
 export function TaskCard({ task }) {
-  const { deleteTask, updateTask } = useTasks();
+  const { updateTask, deleteTask } = useTasks();
   const [pagado, setPagado] = useState(task.pagado);
   const [fechasAdeudadas, setFechasAdeudadas] = useState([]);
   const [proximoPago, setProximoPago] = useState(null);
   const [ultimoIngreso, setUltimoIngreso] = useState(null);
+  const [showForm, setShowForm] = useState(false);
 
   useEffect(() => {
     calcularFechasAdeudadas(task.fechaInicioMembresia);
     setUltimoIngreso(task.ultimoIngreso);
   }, [task.fechaInicioMembresia, task.ultimoIngreso]);
 
-  const handleAbonoClick = async () => {
-    try {
-      if (fechasAdeudadas.length > 0) {
-        fechasAdeudadas.shift();
-        setFechasAdeudadas([...fechasAdeudadas]);
-        setPagado(fechasAdeudadas.length === 0);
-        calcularProximoPago(task.fechaInicioMembresia);
-        await updateTask(task._id, { ...task, pagado: true });
-      }
-    } catch (error) {
-      console.error("Error al registrar el pago:", error);
-    }
+  const handleAbonoClick = () => {
+    setShowForm(true);
+  };
+
+  const handleFormSubmit = async (fecha) => {
+    const nuevasFechasAdeudadas = fechasAdeudadas.filter((f) => f !== fecha);
+    setFechasAdeudadas(nuevasFechasAdeudadas);
+    const pagado = nuevasFechasAdeudadas.length === 0;
+    setPagado(pagado);
+    await updateTask(task._id, { ...task, pagado });
+    setShowForm(false);
   };
 
   const calcularFechasAdeudadas = (fechaInicioMembresia) => {
@@ -52,48 +51,41 @@ export function TaskCard({ task }) {
     }
   };
 
+  const handleDeleteClick = async () => {
+    await deleteTask(task._id);
+  };
+
   return (
-    <Card className="p-4">
-      <div className="mb-4">
-        <h1 className="text-xl font-bold mb-2 text-white">
-          {task.nombre} {task.apellido}
-        </h1>
-        <p className="text-gray-500">DNI: {task.dni}</p>
-        <p className="text-gray-500">
-          Fecha de Nacimiento: {task.fechaNacimiento && new Date(task.fechaNacimiento).toLocaleDateString("es-ES")}
-        </p>
-        <p className="text-gray-500">
-          Fecha de alta de cuenta: {task.fechaInicioMembresia && new Date(task.fechaInicioMembresia).toLocaleDateString("es-ES")}
-        </p>
-        <p className="text-gray-500">
-          Último ingreso: {ultimoIngreso ? new Date(ultimoIngreso).toLocaleString("es-ES") : "Sin información"}
-        </p>
-      </div>
-      {!pagado && proximoPago && (
-        <p className="text-blue-500">
-          Próximo pago: {proximoPago.toLocaleDateString("es-ES", {
-            weekday: "long",
-            year: "numeric",
-            month: "long",
-            day: "numeric",
-          })}
-        </p>
-      )}
-      {!pagado && fechasAdeudadas.length > 0 && (
-        <p className="text-red-500">
-          Fechas adeudadas: {fechasAdeudadas.map((fecha) => fecha.toLocaleDateString("es-ES")).join(", ")}
-        </p>
-      )}
-      <p className="text-gray-500">{task.comentarios}</p>
-      <div className="mt-4 flex justify-between">
-        {!pagado && fechasAdeudadas.length > 0 && (
-          <Button onClick={handleAbonoClick}>Abono</Button>
-        )}
-        <div className="flex gap-x-2 items-center">
-          <Button onClick={() => deleteTask(task._id)}>Delete</Button>
-          <ButtonLink to={`/tasks/${task._id}`}>Edit</ButtonLink>
+    <tr>
+      <td className="py-2 px-4 border-b">{task.nombre}</td>
+      <td className="py-2 px-4 border-b">{task.apellido}</td>
+      <td className="py-2 px-4 border-b">{task.dni}</td>
+      <td className="py-2 px-4 border-b">{task.fechaNacimiento}</td>
+      <td className="py-2 px-4 border-b">{ultimoIngreso}</td>
+      <td className="py-2 px-4 border-b">{proximoPago ? proximoPago.toLocaleDateString() : "N/A"}</td>
+      <td className="py-2 px-4 border-b">{task.comentarios}</td>
+
+      <td className="py-2 px-4 border-b text-center">
+        <span className={`inline-block px-2 py-1 rounded-full text-white ${pagado ? "bg-green-500" : "bg-red-500"}`}>
+          {pagado ? "Pagado" : "Adeuda pagos"}
+        </span>
+      </td>
+      <td className="py-2 px-4 border-b text-center">
+        <Button onClick={handleAbonoClick}>Registrar Pago</Button>
+        <ButtonLink to={`/tasks/${task._id}`}>Editar</ButtonLink>
+        <Button onClick={handleDeleteClick}>Eliminar</Button>
+      </td>
+      {showForm && (
+        <div>
+          <h3>Fechas adeudadas:</h3>
+          {fechasAdeudadas.map((fecha) => (
+            <div key={fecha}>
+              <span>{fecha.toLocaleDateString()}</span>
+              <Button onClick={() => handleFormSubmit(fecha)}>Pagar</Button>
+            </div>
+          ))}
         </div>
-      </div>
-    </Card>
+      )}
+    </tr>
   );
 }
