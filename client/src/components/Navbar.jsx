@@ -21,6 +21,11 @@ export function Navbar() {
                 <i className="fas fa-sign-out-alt mr-1"></i>
               </Link>
             </li>
+            <li>
+              <Link to="/statistics" className="text-white">
+                Estadísticas
+              </Link>
+            </li>
           </>
         ) : (
           <>

@@ -11,7 +11,8 @@ export const getTasks = async (req, res) => {
 
 export const createTask = async (req, res) => {
   try {
-    const { nombre, apellido, dni, fechaNacimiento, fechaInicioMembresia, comentarios } = req.body;
+    const { nombre, apellido, dni, fechaNacimiento, fechaInicioMembresia, comentarios, ultimoPago, // Nuevo campo
+    } = req.body;
     const ultimoIngreso = req.body.ultimoIngreso ? req.body.ultimoIngreso : new Date().toISOString().split('T')[0];
     const newTask = new Task({
       nombre,
@@ -21,6 +22,7 @@ export const createTask = async (req, res) => {
       fechaInicioMembresia,
       comentarios,
       ultimoIngreso,
+      ultimoPago, // Nuevo campo
       user: req.user.id,
     });
     await newTask.save();
@@ -42,10 +44,12 @@ export const deleteTask = async (req, res) => {
 
 export const updateTask = async (req, res) => {
   try {
-    const { nombre, apellido, dni, fechaNacimiento, fechaInicioMembresia, comentarios, pagado } = req.body;
+    const { nombre, apellido, dni, fechaNacimiento, fechaInicioMembresia, comentarios, pagado,      ultimoPago, // Nuevo campo
+    } = req.body;
     const taskUpdated = await Task.findOneAndUpdate(
       { _id: req.params.id, user: req.user.id },
-      { nombre, apellido, dni, fechaNacimiento, fechaInicioMembresia, comentarios, pagado },
+      { nombre, apellido, dni, fechaNacimiento, fechaInicioMembresia, comentarios, pagado,      ultimoPago, // Nuevo campo
+      },
       { new: true }
     );
     if (!taskUpdated) return res.status(404).json({ message: "Task not found or unauthorized" });

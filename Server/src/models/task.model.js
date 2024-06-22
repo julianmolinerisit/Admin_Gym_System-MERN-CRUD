@@ -36,6 +36,9 @@ const taskSchema = new mongoose.Schema(
     ultimoIngreso: {
       type: Date, // Agregar el campo para el último ingreso
     },
+    ultimoPago: {
+      type: Date, // Nuevo campo
+    },
   },
   {
     timestamps: true,

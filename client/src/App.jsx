@@ -6,6 +6,7 @@ import { ProtectedRoute } from "./routes";
 import HomePage from "./pages/HomePage";
 import RegisterPage from "./pages/RegisterPage";
 import RegistroAccesoPage from "./pages/RegistroAccesoPage";
+import StatisticsPage from './pages/StatisticsPage'; // Asegúrate de importar StatisticsPage
 
 import { TaskFormPage } from "./pages/TaskFormPage";
 import { LoginPage } from "./pages/LoginPage";
@@ -29,6 +30,8 @@ function App() {
                 <Route path="/tasks/:id" element={<TaskFormPage />} />
                 <Route path="/profile" element={<h1>Perfil</h1>} />
                 <Route path="/registro-acceso" element={<RegistroAccesoPage/>} /> {/* Nueva ruta */}
+                <Route path="/statistics" element={<StatisticsPage />} /> {/* Define la ruta */}
+
                 
               </Route>
             </Routes>
