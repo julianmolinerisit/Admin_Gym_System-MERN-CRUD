@@ -6,7 +6,6 @@ const RegistroAccesoPage = () => {
 
   return (
     <div>
-      <h1>Registro de Acceso</h1>
       <RegistroAcceso setShowCard={setShowCard} /> {/* Pasamos la función setShowCard al componente hijo */}
       {showCard && (
         <div className="modal"> {/* Estilo CSS para el modal */}

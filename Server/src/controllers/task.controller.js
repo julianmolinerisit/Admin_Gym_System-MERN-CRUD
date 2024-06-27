@@ -1,5 +1,6 @@
 import Task from "../models/task.model.js";
 
+
 export const getTasks = async (req, res) => {
   try {
     const tasks = await Task.find({ user: req.user.id }).populate("user");
@@ -35,9 +36,14 @@ export const createTask = async (req, res) => {
 export const deleteTask = async (req, res) => {
   try {
     const deletedTask = await Task.findByIdAndDelete(req.params.id);
-    if (!deletedTask) return res.status(404).json({ message: "Task not found" });
+    if (!deletedTask) {
+      console.log(`No se encontró la tarea con el ID: ${req.params.id}`);
+      return res.status(404).json({ message: "Task not found" });
+    }
+    console.log(`Tarea eliminada correctamente: ${deletedTask}`);
     return res.sendStatus(204);
   } catch (error) {
+    console.error(`Error al eliminar la tarea: ${error.message}`);
     return res.status(500).json({ message: error.message });
   }
 };
@@ -75,5 +81,30 @@ export const findTaskByDNI = async (dni) => {
     return task;
   } catch (error) {
     throw new Error('Error al buscar la tarea por DNI');
+  }
+};
+
+export const getTaskWithDebt = async (req, res) => {
+  try {
+      const task = await Task.findById(req.params.id);
+      if (!task) {
+          return res.status(404).json({ error: 'Task not found' });
+      }
+
+      const deuda = await calculateDebt(task.fechaInicioMembresia, task.ultimoPago);
+      res.status(200).json({ ...task.toObject(), deuda });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+};
+
+// Ejemplo de una función para actualizar el precio mensual
+export const updatePrecioMensualRequest = async (precioMensual) => {
+  try {
+    const response = await axios.put('/api/precios', { precioMensual });
+    return response.data;
+  } catch (error) {
+    console.error('Error updating monthly price:', error);
+    throw error;
   }
 };

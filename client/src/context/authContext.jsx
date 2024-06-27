@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
   const [errors, setErrors] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // clear errors after 5 seconds
+  // Clear errors after 5 seconds
   useEffect(() => {
     if (errors.length > 0) {
       const timer = setTimeout(() => {
@@ -33,10 +33,12 @@ export const AuthProvider = ({ children }) => {
       if (res.status === 200) {
         setUser(res.data);
         setIsAuthenticated(true);
+        setLoading(false);
       }
     } catch (error) {
       console.log(error.response.data);
       setErrors(error.response.data.message);
+      setLoading(false);
     }
   };
 
@@ -45,9 +47,11 @@ export const AuthProvider = ({ children }) => {
       const res = await loginRequest(user);
       setUser(res.data);
       setIsAuthenticated(true);
+      setLoading(false);
     } catch (error) {
       console.log(error);
-      // setErrors(error.response.data.message);
+      setErrors(error.response.data.message);
+      setLoading(false);
     }
   };
 
@@ -68,8 +72,11 @@ export const AuthProvider = ({ children }) => {
 
       try {
         const res = await verifyTokenRequest(cookies.token);
-        console.log(res);
-        if (!res.data) return setIsAuthenticated(false);
+        if (!res.data) {
+          setIsAuthenticated(false);
+          setLoading(false);
+          return;
+        }
         setIsAuthenticated(true);
         setUser(res.data);
         setLoading(false);
