@@ -59,11 +59,10 @@ const CheckoutManagement = () => {
   };
 
   return (
-    <>
-     <div className="container mx-auto p-4 bg-gray-800 text-white rounded-lg">
-
-      <h2 className="text-xl font-bold mt-4">Registro de Pagos</h2>
-      <div className="flex space-x-4 mt-4">
+    <div className="container mx-auto p-4 bg-gray-800 text-white rounded-lg shadow-lg">
+      <h2 className="text-3xl font-bold mb-4">Registro de Pagos</h2>
+      
+      <div className="flex flex-wrap space-x-4 mb-4">
         <DatePicker
           selected={startDate}
           onChange={(date) => setStartDate(date)}
@@ -78,35 +77,36 @@ const CheckoutManagement = () => {
           selectsEnd
           startDate={startDate}
           endDate={endDate}
-          className="bg-gray-700 text-white p-2 rounded ml-4"
+          className="bg-gray-700 text-white p-2 rounded"
         />
       </div>
-      <div className="flex space-x-4 mt-4">
+
+      <div className="flex space-x-4 mb-4">
         <button onClick={() => handleFilterChange("day")} className={`px-4 py-2 rounded ${filter === "day" ? "bg-blue-600" : "bg-gray-700"}`}>Día</button>
         <button onClick={() => handleFilterChange("week")} className={`px-4 py-2 rounded ${filter === "week" ? "bg-blue-600" : "bg-gray-700"}`}>Semana</button>
         <button onClick={() => handleFilterChange("month")} className={`px-4 py-2 rounded ${filter === "month" ? "bg-blue-600" : "bg-gray-700"}`}>Mes</button>
       </div>
 
-      <table className="table-auto w-full mt-4">
+      <table className="table-auto w-full mb-4">
         <thead>
           <tr>
-            <th className="px-4 py-2">Fecha</th>
-            <th className="px-4 py-2">Monto Pagado</th>
-            <th className="px-4 py-2">Usuario</th>
+            <th className="px-4 py-2 text-left">Fecha</th>
+            <th className="px-4 py-2 text-left">Monto Pagado</th>
+            <th className="px-4 py-2 text-left">Usuario</th>
           </tr>
         </thead>
         <tbody>
           {filteredPayments.map((payment) => (
-            <tr key={payment._id}>
-              <td className="border px-4 py-2">{new Date(payment.fecha).toLocaleDateString()}</td>
-              <td className="border px-4 py-2">${payment.monto.toFixed(2)}</td>
-              <td className="border px-4 py-2">{payment.usuario}</td>
+            <tr key={payment._id} className="bg-gray-700 border-b border-gray-600">
+              <td className="px-4 py-2">{new Date(payment.fecha).toLocaleDateString()}</td>
+              <td className="px-4 py-2">${payment.monto.toFixed(2)}</td>
+              <td className="px-4 py-2">{payment.usuario}</td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      <h2 className="text-xl font-bold mt-4">Estadísticas de Pagos</h2>
+      <h2 className="text-2xl font-bold mb-4">Estadísticas de Pagos</h2>
       <p>Total Recaudado: ${totalRecaudado.toFixed(2)}</p>
       <p>Promedio de Pago: ${promedioPago}</p>
       <p>Pago Máximo: ${pagoMaximo.toFixed(2)}</p>
@@ -119,8 +119,6 @@ const CheckoutManagement = () => {
         Realizar Cierre de Caja
       </button>
     </div>
-    </>
-
   );
 };
 

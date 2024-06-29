@@ -4,10 +4,9 @@ import { Card } from "./ui/Card";
 import { findTaskByDNIRequest } from "../api/tasks"; // Importa la función para buscar por DNI
 import { Button } from "./ui/Button";
 
-
 const RegistroAcceso = ({ setShowCard }) => {
-  const [dni, setDni] = useState('');
-  const [registrationMessage, setRegistrationMessage] = useState('');
+  const [dni, setDni] = useState("");
+  const [registrationMessage, setRegistrationMessage] = useState("");
   const [taskInfo, setTaskInfo] = useState(null); // Estado para almacenar la información de la tarea encontrada
   const [pagado, setPagado] = useState(false);
   const [fechasAdeudadas, setFechasAdeudadas] = useState([]);
@@ -22,9 +21,9 @@ const RegistroAcceso = ({ setShowCard }) => {
     e.preventDefault();
     try {
       const response = await registrarAccesoRequest(dni);
-      setRegistrationMessage('Acceso registrado con éxito');
+      setRegistrationMessage("Acceso registrado con éxito");
       console.log("DNI registrado:", dni);
-      setDni('');
+      setDni("");
       setShowCard(true); // Mostrar la tarjeta al registrar el acceso correctamente
 
       // Realizar la búsqueda por DNI después de registrar el acceso
@@ -37,7 +36,7 @@ const RegistroAcceso = ({ setShowCard }) => {
 
       calcularFechasAdeudadas(taskData.fechaInicioMembresia);
     } catch (error) {
-      setRegistrationMessage('Error al registrar el acceso');
+      setRegistrationMessage("Error al registrar el acceso");
       console.error("Error al registrar el acceso:", error.message);
     }
   };
@@ -73,7 +72,12 @@ const RegistroAcceso = ({ setShowCard }) => {
         <h1 className="text-2xl font-bold mb-4">Registro de Acceso</h1>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="dni" className="block text-gray-700 font-medium mb-2">DNI:</label>
+            <label
+              htmlFor="dni"
+              className="block text-gray-700 font-medium mb-2"
+            >
+              DNI:
+            </label>
             <input
               type="text"
               id="dni"
@@ -87,19 +91,35 @@ const RegistroAcceso = ({ setShowCard }) => {
           <Button type="submit" className="w-full">
             Registrar Acceso
           </Button>
-          {registrationMessage && <p className={registrationMessage.includes('Error') ? 'text-red-600' : 'text-green-600'}>{registrationMessage}</p>}
+          {registrationMessage && (
+            <p
+              className={
+                registrationMessage.includes("Error")
+                  ? "text-red-600"
+                  : "text-green-600"
+              }
+            >
+              {registrationMessage}
+            </p>
+          )}
         </form>
         {/* Mostrar la información de la tarea encontrada si existe */}
         {taskInfo && (
           <div>
-            <h1 className="text-xl font-bold mb-2 text-white">{taskInfo.nombre} {taskInfo.apellido}</h1>
+            <h1 className="text-xl font-bold mb-2 text-white">
+              {taskInfo.nombre} {taskInfo.apellido}
+            </h1>
             <p className="text-gray-500">DNI: {taskInfo.dni}</p>
             <p className="text-gray-500">
-              Último ingreso: {ultimoIngreso ? new Date(ultimoIngreso).toLocaleString("es-ES") : "Sin información"}
+              Último ingreso:{" "}
+              {ultimoIngreso
+                ? new Date(ultimoIngreso).toLocaleString("es-ES")
+                : "Sin información"}
             </p>
             {!pagado && proximoPago && (
               <p className="text-blue-500">
-                Próximo pago: {proximoPago.toLocaleDateString("es-ES", {
+                Próximo pago:{" "}
+                {proximoPago.toLocaleDateString("es-ES", {
                   weekday: "long",
                   year: "numeric",
                   month: "long",
@@ -109,9 +129,13 @@ const RegistroAcceso = ({ setShowCard }) => {
             )}
             {!pagado && fechasAdeudadas.length > 0 && (
               <p className="text-red-500">
-                Fechas adeudadas: {fechasAdeudadas.map((fecha) => fecha.toLocaleDateString("es-ES")).join(", ")}
+                Fechas adeudadas:{" "}
+                {fechasAdeudadas
+                  .map((fecha) => fecha.toLocaleDateString("es-ES"))
+                  .join(", ")}
               </p>
-            )}          </div>
+            )}{" "}
+          </div>
         )}
       </Card>
     </div>

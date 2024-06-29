@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "../api/axios";
 import {
+  BarChart,
+  Bar,
   LineChart,
   Line,
   XAxis,
@@ -8,11 +10,6 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  PieChart,
-  Pie,
-  Cell,
-  BarChart,
-  Bar,
 } from "recharts";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -27,48 +24,43 @@ const StatisticsPage = () => {
   const [filter, setFilter] = useState("month");
   const [startDate, setStartDate] = useState(new Date());
   const [endDate, setEndDate] = useState(new Date());
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [activeUsers, setActiveUsers] = useState([]); // Corrected state name
 
   useEffect(() => {
-    const fetchStatistics = async () => {
+    const fetchData = async () => {
+      setLoading(true);
+      setError(null);
       try {
-        const response = await axios.get("/statistics");
-        setStatistics(response.data);
-      } catch (error) {
-        console.error("Error fetching statistics:", error);
+        const [
+          statsRes,
+          usersRes,
+          priceRes,
+          paymentsRes,
+          activeUsersRes,
+        ] = await Promise.all([
+          axios.get("/statistics"),
+          axios.get("/tasks"),
+          axios.get("/price-evolution"),
+          axios.get("/pagos"),
+          axios.get("/active-users-evolution"),
+        ]);
+
+        setStatistics(statsRes.data);
+        setUsers(usersRes.data);
+        setPriceEvolution(priceRes.data.reverse());
+        setPayments(paymentsRes.data);
+        setActiveUsers(activeUsersRes.data.reverse()); // Corrected state update
+      } catch (err) {
+        setError("Error fetching data. Please try again later.");
+        console.error("Error fetching data:", err);
+      } finally {
+        setLoading(false);
       }
     };
 
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get("/tasks");
-        setUsers(response.data);
-      } catch (error) {
-        console.error("Error fetching users:", error);
-      }
-    };
-
-    const fetchPriceEvolution = async () => {
-      try {
-        const response = await axios.get("/price-evolution");
-        setPriceEvolution(response.data);
-      } catch (error) {
-        console.error("Error fetching price evolution:", error);
-      }
-    };
-
-    const fetchPayments = async () => {
-      try {
-        const response = await axios.get("/pagos");
-        setPayments(response.data);
-      } catch (error) {
-        console.error("Error fetching payments:", error);
-      }
-    };
-
-    fetchStatistics();
-    fetchUsers();
-    fetchPriceEvolution();
-    fetchPayments();
+    fetchData();
   }, []);
 
   useEffect(() => {
@@ -88,13 +80,11 @@ const StatisticsPage = () => {
 
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
-  // Calculando estadísticas de pagos
   const totalRecaudado = payments.reduce((sum, payment) => sum + payment.monto, 0);
-  const promedioPago = (payments.length > 0) ? (totalRecaudado / payments.length).toFixed(2) : 0;
-  const pagoMaximo = payments.length > 0 ? Math.max(...payments.map(payment => payment.monto)) : 0;
-  const pagoMinimo = payments.length > 0 ? Math.min(...payments.map(payment => payment.monto)) : 0;
+  const promedioPago = payments.length > 0 ? (totalRecaudado / payments.length).toFixed(2) : 0;
+  const pagoMaximo = payments.length > 0 ? Math.max(...payments.map((payment) => payment.monto)) : 0;
+  const pagoMinimo = payments.length > 0 ? Math.min(...payments.map((payment) => payment.monto)) : 0;
 
-  // Filtrando pagos
   const filteredPayments = payments.filter((payment) => {
     const paymentDate = new Date(payment.fecha);
     if (filter === "day") {
@@ -118,10 +108,56 @@ const StatisticsPage = () => {
     }
   };
 
-  const handleCierreDeCaja = () => {
-    // Aquí puedes implementar cualquier lógica adicional que necesites para el cierre de caja.
-    alert(`Cierre de caja completado. Total recaudado: ${totalRecaudado}`);
-    // Resetear estadísticas de pagos si es necesario
+  const formatDay = (dayNumber) => {
+    const daysOfWeek = [
+      "Domingo",
+      "Lunes",
+      "Martes",
+      "Miércoles",
+      "Jueves",
+      "Viernes",
+      "Sábado",
+    ];
+    return daysOfWeek[dayNumber - 1];
+  };
+
+  const formatHour = (hour) => {
+    const date = new Date();
+    date.setHours((hour - 3 + 24) % 24, 0, 0);
+    return date.toLocaleTimeString("es-ES", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  };
+
+  const renderUserStatistics = () => {
+    if (!selectedUser) return null;
+    if (!userStatistics) return <p>Cargando estadísticas del usuario...</p>;
+
+    return (
+      <div className="chart-container grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+        <div className="bg-gray-700 p-4 rounded">
+          <BarChart width={500} height={300} data={userStatistics.attendanceByDay || []}>
+            <XAxis dataKey="day" stroke="#ffffff" />
+            <YAxis stroke="#ffffff" />
+            <CartesianGrid strokeDasharray="3 3" />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="count" fill="#8884d8" />
+          </BarChart>
+        </div>
+        <div className="bg-gray-700 p-4 rounded">
+          <BarChart width={500} height={300} data={userStatistics.attendanceByHour || []}>
+            <XAxis dataKey="hour" stroke="#ffffff" />
+            <YAxis stroke="#ffffff" />
+            <CartesianGrid strokeDasharray="3 3" />
+            <Tooltip />
+            <Legend />
+            <Bar dataKey="count" fill="#8884d8" />
+          </BarChart>
+        </div>
+      </div>
+    );
   };
 
   return (
@@ -131,10 +167,7 @@ const StatisticsPage = () => {
         <div className="w-1/4 bg-gray-700 p-4 rounded mr-4">
           <h2 className="text-xl font-bold">Lista de Usuarios</h2>
           <ul className="list-disc list-inside">
-            <li
-              onClick={() => setSelectedUser(null)}
-              className="cursor-pointer hover:bg-gray-600 p-2 rounded"
-            >
+            <li onClick={() => setSelectedUser(null)} className="cursor-pointer hover:bg-gray-600 p-2 rounded">
               General
             </li>
             {users.map((user) => (
@@ -152,51 +185,7 @@ const StatisticsPage = () => {
           {selectedUser ? (
             <div>
               <h2 className="text-xl font-bold">Estadísticas del Usuario</h2>
-              {userStatistics ? (
-                <>
-                  <p>
-                    Visitas este mes:{" "}
-                    <span className="font-semibold">{userStatistics.visitsThisMonth}</span>
-                  </p>
-                  <p>
-                    Visitas esta semana:{" "}
-                    <span className="font-semibold">{userStatistics.visitsThisWeek}</span>
-                  </p>
-                  <p>
-                    Días más visitados:{" "}
-                    <span className="font-semibold">{userStatistics.mostVisitedDays?.join(", ") || "N/A"}</span>
-                  </p>
-                  <p>
-                    Horarios más concurridos:{" "}
-                    <span className="font-semibold">{userStatistics.mostVisitedHours?.join(", ") || "N/A"}</span>
-                  </p>
-                  {/* Gráficos de asistencia por día y hora */}
-                  <div className="chart-container grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <div className="bg-gray-700 p-4 rounded">
-                      <BarChart width={500} height={300} data={userStatistics.attendanceByDay || []}>
-                        <XAxis dataKey="day" stroke="#ffffff" />
-                        <YAxis stroke="#ffffff" />
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="count" fill="#8884d8" />
-                      </BarChart>
-                    </div>
-                    <div className="bg-gray-700 p-4 rounded">
-                      <BarChart width={500} height={300} data={userStatistics.attendanceByHour || []}>
-                        <XAxis dataKey="hour" stroke="#ffffff" />
-                        <YAxis stroke="#ffffff" />
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <Tooltip />
-                        <Legend />
-                        <Bar dataKey="count" fill="#8884d8" />
-                      </BarChart>
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <p>Cargando estadísticas del usuario...</p>
-              )}
+              {renderUserStatistics()}
             </div>
           ) : (
             <>
@@ -207,11 +196,15 @@ const StatisticsPage = () => {
                 </p>
                 <p>
                   Membresías activas:{" "}
-                  <span className="font-semibold">{statistics.activeMemberships}</span>
+                  <span className="font-semibold">
+                    {statistics.activeMemberships}
+                  </span>
                 </p>
                 <p>
                   Membresías expiradas:{" "}
-                  <span className="font-semibold">{statistics.expiredMemberships}</span>
+                  <span className="font-semibold">
+                    {statistics.expiredMemberships}
+                  </span>
                 </p>
                 <h2 className="text-xl font-bold mt-4">Registros mensuales:</h2>
                 <ul className="list-disc list-inside">
@@ -223,75 +216,86 @@ const StatisticsPage = () => {
                 </ul>
               </div>
 
+              <h2 className="text-xl font-bold mt-4">Días más concurridos:</h2>
+              <div className="chart-container grid grid-cols-1 gap-4 mt-4">
+                <div className="bg-gray-700 p-4 rounded">
+                  <ul>
+                    {statistics.busiestDays?.map((day, index) => (
+                      <li key={index}>
+                        Día: {formatDay(day._id)}, Visitas: {day.count}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <h2 className="text-xl font-bold mt-4">
+                Horarios más concurridos:
+              </h2>
+              <div className="chart-container grid grid-cols-1 gap-4 mt-4">
+                <div className="bg-gray-700 p-4 rounded">
+                  <ul>
+                    {statistics.busiestHours?.map((hour, index) => (
+                      <li key={index}>
+                        Hora: {formatHour(hour._id)}, Visitas: {hour.count}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
               <div className="chart-container grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
                 <div className="bg-gray-700 p-4 rounded">
+                  <h2 className="text-xl font-bold">Evolución del precio</h2>
                   <LineChart
                     width={500}
                     height={300}
-                    data={statistics.monthlyRegistrations}
+                    data={priceEvolution.map((item) => ({
+                      ...item,
+                      fecha: new Date(item.fecha).toLocaleDateString(),
+                    }))}
                   >
-                    <XAxis dataKey="_id" stroke="#ffffff" />
+                    <XAxis dataKey="fecha" stroke="#ffffff" />
                     <YAxis stroke="#ffffff" />
                     <CartesianGrid strokeDasharray="3 3" />
                     <Tooltip />
                     <Legend />
-                    <Line type="monotone" dataKey="count" stroke="#8884d8" />
+                    <Line
+                      type="monotone"
+                      dataKey="precio"
+                      stroke="#8884d8"
+                      strokeWidth={2}
+                    />
                   </LineChart>
                 </div>
 
                 <div className="bg-gray-700 p-4 rounded">
-                  <PieChart width={400} height={400}>
-                    <Pie
+                  <h2 className="text-xl font-bold">
+                    Evolución de usuarios activos
+                  </h2>
+                  <LineChart
+                    width={500}
+                    height={300}
+                    data={activeUsers.map((item) => ({
+                      ...item,
+                      fecha: new Date(item.fecha).toLocaleDateString(),
+                    }))}
+                  >
+                    <XAxis dataKey="fecha" stroke="#ffffff" />
+                    <YAxis stroke="#ffffff" />
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <Tooltip />
+                    <Legend />
+                    <Line
+                      type="monotone"
                       dataKey="count"
-                      isAnimationActive={false}
-                      data={statistics.monthlyRegistrations}
-                      cx={200}
-                      cy={200}
-                      outerRadius={80}
-                      fill="#8884d8"
-                      label
-                    >
-                      {statistics.monthlyRegistrations?.map((entry, index) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={COLORS[index % COLORS.length]}
-                        />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
+                      stroke="#8884d8"
+                      strokeWidth={2}
+                    />
+                  </LineChart>
                 </div>
               </div>
-
-              <h2 className="text-xl font-bold mt-4">Días más concurridos:</h2>
-              <div className="chart-container grid grid-cols-1 gap-4 mt-4">
-                <div className="bg-gray-700 p-4 rounded">
-                  <BarChart width={500} height={300} data={statistics.busiestDays}>
-                    <XAxis dataKey="_id" stroke="#ffffff" />
-                    <YAxis stroke="#ffffff" />
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="count" fill="#8884d8" />
-                  </BarChart>
-                </div>
-              </div>
-
-              <h2 className="text-xl font-bold mt-4">Horarios más concurridos:</h2>
-              <div className="chart-container grid grid-cols-1 gap-4 mt-4">
-                <div className="bg-gray-700 p-4 rounded">
-                  <BarChart width={500} height={300} data={statistics.busiestHours}>
-                    <XAxis dataKey="_id" stroke="#ffffff" />
-                    <YAxis stroke="#ffffff" />
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="count" fill="#8884d8" />
-                  </BarChart>
-                </div>
-              </div>
-
-             
+            
             </>
           )}
         </div>
@@ -301,6 +305,3 @@ const StatisticsPage = () => {
 };
 
 export default StatisticsPage;
-
-
-

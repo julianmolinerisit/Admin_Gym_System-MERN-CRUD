@@ -37,11 +37,20 @@ export const addPriceRequest = async (precio) => axios.post('/precios', { precio
 export const updatePriceRequest = async (id, precio) => axios.put(`/precios/${id}`, { precio });
 
 // Fetches price evolution
-export const getPriceEvolutionRequest = async () => axios.get('/precios/evolution'); // Ajuste en la ruta
+export const getPriceEvolutionRequest = async () => axios.get('/price-evolution');
 
 // Fetches all payments
 export const getPaymentsRequest = async () => axios.get('/pagos');
 
 // Creates a new payment
 export const addPaymentRequest = async (monto, usuario) => axios.post('/pagos', { monto, usuario });
+
+// Fetches active users evolution
+export const getActiveUsersEvolutionRequest = async () => axios.get('/active-users-evolution');
+
+// Fetches general statistics
+export const getStatisticsRequest = async () => axios.get('/statistics');
+
+// Fetches user statistics by ID
+export const getUserStatisticsRequest = async (id) => axios.get(`/user-statistics/${id}`);
 

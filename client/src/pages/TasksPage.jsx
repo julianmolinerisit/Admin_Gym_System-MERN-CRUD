@@ -103,10 +103,10 @@ export function TasksPage() {
           Recientes
         </button>
         <button onClick={() => filterTasks("viejos")} className="mx-2 px-4 py-2 bg-gray-700 text-white rounded">
-          Viejos
+          Anteriores
         </button>
         <button onClick={() => filterTasks("deudores")} className="mx-2 px-4 py-2 bg-gray-700 text-white rounded">
-          Deudores
+          Impagos
         </button>
       </div>
 
